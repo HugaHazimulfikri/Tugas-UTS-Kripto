@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Knight's Tour Cipher - Demo interaktif cipher berbasis langkah kuda catur 8x8. Tugas mata kuliah Kriptografi.">
+    <title>Knight's Tour Cipher — Demo Interaktif</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- Hero Header -->
+    <header class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-icon">
+                <svg viewBox="0 0 64 64" class="knight-svg" id="heroKnight">
+                    <path d="M20 52h24v4H20zm2-4h20l2-6h-24zm4-10c0 0-2-3-2-6s1-5 3-7c2-2 5-3 7-3h2c1-3 0-6-2-9l4-2c3 4 4 8 3 12h1c3 0 6 2 7 5s1 7-1 10h-22zm4-12c-1 1-2 3-2 5s1 3 1 3h14c1-2 1-5 0-6s-3-3-5-3h-4c-2 0-3 0-4 1z" fill="currentColor"/>
+                </svg>
+            </div>
+            <h1 class="hero-title">
+                <span class="hero-title-line">Knight's Tour</span>
+                <span class="hero-title-accent">Cipher</span>
+            </h1>
+            <p class="hero-subtitle">Enkripsi berbasis langkah kuda catur pada papan 8×8</p>
+            <div class="hero-badges">
+                <span class="badge">Kriptografi Klasik</span>
+                <span class="badge">Chess-Based</span>
+                <span class="badge">64 Karakter</span>
+            </div>
+        </div>
+        <div class="scroll-indicator" id="scrollIndicator">
+            <span>Scroll untuk mulai</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- How It Works Section -->
+        <section class="section" id="howItWorks">
+            <h2 class="section-title">
+                <span class="section-number">01</span>
+                Cara Kerja
+            </h2>
+            <div class="how-grid">
+                <div class="how-card" data-step="1">
+                    <div class="how-card-icon">🔑</div>
+                    <h3>Kunci → Seed</h3>
+                    <p>Kunci string di-hash dengan FNV-1a 32-bit menjadi seed numerik untuk PRNG.</p>
+                </div>
+                <div class="how-card" data-step="2">
+                    <div class="how-card-icon">♞</div>
+                    <h3>Bangun Tour</h3>
+                    <p>PRNG menentukan urutan langkah, titik awal, dan arah. Heuristik Warnsdorff + backtracking menghasilkan jalur knight's tour unik.</p>
+                </div>
+                <div class="how-card" data-step="3">
+                    <div class="how-card-icon">🗺️</div>
+                    <h3>Pemetaan</h3>
+                    <p>64 karakter alfabet dipetakan ke kotak papan sesuai urutan tour. Ini menjadi tabel substitusi.</p>
+                </div>
+                <div class="how-card" data-step="4">
+                    <div class="how-card-icon">🔐</div>
+                    <h3>Enkripsi</h3>
+                    <p>Setiap karakter digeser posisinya di papan mengikuti langkah kuda. Arah berubah tiap karakter → polyalphabetic!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cipher Demo Section -->
+        <section class="section" id="cipherDemo">
+            <h2 class="section-title">
+                <span class="section-number">02</span>
+                Demo Cipher
+            </h2>
+            <div class="demo-layout">
+                <!-- Controls Panel -->
+                <div class="panel controls-panel">
+                    <div class="panel-header">
+                        <h3>Kontrol</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <label for="keyInput">🔑 Kunci</label>
+                            <input type="text" id="keyInput" value="KRIPTO" placeholder="Masukkan kunci..." autocomplete="off">
+                        </div>
+                        <div class="mode-toggle" id="modeToggle">
+                            <button class="mode-btn active" data-mode="encrypt" id="btnEncrypt">
+                                <span class="mode-icon">🔒</span> Enkripsi
+                            </button>
+                            <button class="mode-btn" data-mode="decrypt" id="btnDecrypt">
+                                <span class="mode-icon">🔓</span> Dekripsi
+                            </button>
+                        </div>
+                        <div class="input-group">
+                            <label for="inputText">📝 Teks Input</label>
+                            <textarea id="inputText" rows="3" placeholder="Ketik teks di sini...">Selamat Pagi Kriptografi</textarea>
+                        </div>
+                        <button class="btn-process" id="btnProcess">
+                            <span class="btn-icon">⚡</span>
+                            <span class="btn-text">Proses</span>
+                            <div class="btn-ripple"></div>
+                        </button>
+                        <div class="input-group">
+                            <label for="outputText">📤 Hasil</label>
+                            <textarea id="outputText" rows="3" readonly placeholder="Hasil akan muncul di sini..."></textarea>
+                        </div>
+                        <div class="alphabet-info">
+                            <label>📋 Alfabet (64 karakter)</label>
+                            <code class="alphabet-display" id="alphabetDisplay"></code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Board Panel -->
+                <div class="panel board-panel">
+                    <div class="panel-header">
+                        <h3>Papan 8×8</h3>
+                        <div class="board-controls">
+                            <button class="board-btn" id="btnShowTour" title="Tampilkan jalur tour">
+                                🛤️ Tour
+                            </button>
+                            <button class="board-btn" id="btnShowChars" title="Tampilkan karakter">
+                                🔤 Karakter
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body board-body">
+                        <div class="board-container">
+                            <div class="board-labels board-labels-top" id="colLabels"></div>
+                            <div class="board-main">
+                                <div class="board-labels board-labels-left" id="rowLabels"></div>
+                                <div class="board-grid" id="boardGrid"></div>
+                            </div>
+                        </div>
+                        <div class="board-legend" id="boardLegend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: var(--accent-primary)"></span>
+                                <span>Sumber</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: var(--accent-secondary)"></span>
+                                <span>Tujuan</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: var(--accent-tertiary)"></span>
+                                <span>Jalur Tour</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trace Section -->
+        <section class="section" id="traceSection">
+            <h2 class="section-title">
+                <span class="section-number">03</span>
+                Trace Langkah
+            </h2>
+            <div class="panel trace-panel">
+                <div class="panel-header">
+                    <h3>Detail Langkah per Karakter</h3>
+                    <button class="board-btn" id="btnAnimate" disabled>
+                        ▶ Animasi
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="trace-container" id="traceContainer">
+                        <p class="trace-placeholder">Proses enkripsi/dekripsi terlebih dahulu untuk melihat trace langkah.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Algorithm Section -->
+        <section class="section" id="algorithmSection">
+            <h2 class="section-title">
+                <span class="section-number">04</span>
+                Detail Algoritma
+            </h2>
+            <div class="algo-grid">
+                <div class="algo-card">
+                    <h3>🎲 FNV-1a Hash</h3>
+                    <pre><code>h = 2166136261
+for ch in key:
+    h ^= ord(ch)
+    h = (h * 16777619) & 0xFFFFFFFF</code></pre>
+                    <p>Menghasilkan seed 32-bit dari kunci string. Distribusi baik untuk variasi kunci kecil.</p>
+                </div>
+                <div class="algo-card">
+                    <h3>♞ Warnsdorff's Rule</h3>
+                    <pre><code>// Prioritaskan kotak dengan
+// tetangga paling sedikit
+cands = sorted by degree(q)
+for q in cands:
+    if dfs(q): return True</code></pre>
+                    <p>Heuristik greedy untuk menemukan Hamilton path. Backtracking digunakan sebagai fallback.</p>
+                </div>
+                <div class="algo-card">
+                    <h3>🔄 Dynamic Direction</h3>
+                    <pre><code>// Arah berubah tiap karakter
+d = (index[output] + j) % 8
+// j = nomor karakter ke-n</code></pre>
+                    <p>Arah langkah kuda berubah setiap karakter, membuat cipher bersifat <strong>polyalphabetic</strong>.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Knight's Tour Cipher — Tugas Mata Kuliah Kriptografi</p>
+        <p class="footer-sub">Dibuat untuk pembelajaran, bukan pengaman data sungguhan.</p>
+    </footer>
+
+    <script src="cipher.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
